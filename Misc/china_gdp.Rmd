@@ -1,0 +1,35 @@
+---
+title: "china_gdp"
+author: "Subodh"
+date: "8/16/2021"
+output: html_document
+---
+
+```{r}
+library(rvest)
+library(tidyverse)
+library(janitor)
+#install.packages("ggmap")
+#install.packages("leaflet")
+library(leaflet)
+library(ggmap)
+library(rio)
+```
+
+
+```{r}
+setwd("~/Desktop/Pet Analysis/Misc")
+
+china <- read_html("https://en.wikipedia.org/wiki/List_of_Chinese_administrative_divisions_by_GDP")
+gdp <- china %>% html_table(fill=TRUE)
+df <- gdp[[4]]
+df <- data.frame(df)
+
+colnames(df )<- df[1,]
+df<- df[-1,]
+country <- clean_names(df)
+write.csv(country,"country.csv")
+
+```
+
+

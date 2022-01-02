@@ -1,0 +1,74 @@
+---
+title: "mountain"
+author: "Subodh"
+date: "3/24/2021"
+output: html_document
+---
+
+```{r}
+library(rvest)
+library(tidyverse)
+library(janitor)
+#install.packages("ggmap")
+#install.packages("leaflet")
+library(leaflet)
+library(ggmap)
+library(rio)
+```
+
+
+```{r}
+setwd("~/Desktop/Pet Analysis/Misc")
+url <- read_html("https://en.wikipedia.org/wiki/List_of_highest_mountains_on_Earth")
+df <- url %>% html_table(fill = TRUE)
+d <- df[[3]]
+dff <- d[-c(1:3),-c(1,5,6,9:12)]
+tf <- clean_names(dff)
+tf <- rename(tf, mountain_name = mountain_name_s, height_meter = height_6, height_ft = height_6_2,coordinates = coordinates_8,country=country_disputed_claims_in_italics)
+
+```
+
+```{r}
+d <- read_html("https://www.advfn.com/nyse/newyorkstockexchange.asp")
+dd <- d %>% html_table()
+```
+
+
+```{r}
+dd <- d 
+```
+
+
+
+
+```{r}
+
+tf$height_ft <- as.numeric(gsub(",","",tf$height_ft))
+tf$height_meter <- as.numeric(gsub(",","",tf$height_meter))
+tf$coordinatee <- str_sub(tf$coordinates,27,47)
+tf$coordinate <- str_sub(tf$coordinates,1,21)
+tf <- tf %>% separate(coordinate,c("latd","long")," ")
+tf <- tf %>% separate(coordinatee,c("latd1","long1")," ")
+tf$long1 <- str_sub(tf$long1, end = -3)
+tf$latd1 <- str_sub(tf$latd1, end = -3)
+tf$long1 <- as.numeric(tf$long1)
+tf$latd1 <- as.numeric(tf$latd1)
+str(tf)
+View(tf)
+tf <- tf[,-c(4,5,6,9,10)]
+mt <- c("Mt. Everest", 8848, 29029,27.9881,86.9253)
+tf <- rbind(tf,mt)
+tf <- arrange(tf,desc(height_meter))
+tf$latd1 <- as.numeric(tf$latd1)
+tf$long1 <- as.numeric(tf$long1)
+tf <- head(tf,10)
+str(tf)
+```
+```{r}
+map <- leaflet() %>% addTiles() %>% addCircleMarkers(data = tf, lat = ~latd1, lng = ~long1, popup = ~mountain_name)
+map
+
+```
+
+
+
